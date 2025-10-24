@@ -1,332 +1,1106 @@
-<!doctype html>
-<html lang="en">
+
+<html lang="id">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Toko Sederhana - Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMKN Takeran - Dashboard</title>
     <style>
-        :root{
-            --bg:#f6f8fb; --card:#fff; --accent:#0b6efd; --muted:#667085;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        *{box-sizing:border-box}
-        body{
-            margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-            background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
-            color:#0b1220;
+
+        :root {
+            --bg-primary: #f0f9ff;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: linear-gradient(180deg, #0891b2 0%, #06b6d4 100%);
+            --bg-hero: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #22d3ee 100%);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-sidebar: #e0f2fe;
+            --text-sidebar-active: #fff;
+            --border-color: #e5e5e5;
+            --table-header: #ecfeff;
+            --table-header-text: #0e7490;
+            --log-bg: #ecfeff;
+            --log-border: #06b6d4;
+            --btn-primary: #0891b2;
+            --btn-hover: #0e7490;
         }
-        header{
-            display:flex; align-items:center; justify-content:space-between;
-            gap:1rem; padding:1rem 1.25rem; background:transparent;
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-sidebar: linear-gradient(180deg, #164e63 0%, #155e75 100%);
+            --bg-hero: linear-gradient(135deg, #164e63 0%, #155e75 50%, #0e7490 100%);
+            --text-primary: #e2e8f0;
+            --text-secondary: #cbd5e1;
+            --text-sidebar: #cffafe;
+            --text-sidebar-active: #fff;
+            --border-color: #334155;
+            --table-header: #1e293b;
+            --table-header-text: #22d3ee;
+            --log-bg: #1e293b;
+            --log-border: #0891b2;
+            --btn-primary: #0891b2;
+            --btn-hover: #0e7490;
         }
-        .brand{display:flex;align-items:center;gap:.75rem;font-weight:700}
-        .logo{
-            width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6ea8fe);
-            display:grid;place-items:center;color:#fff;font-weight:700;
-            box-shadow:0 6px 18px rgba(11,110,253,.12);
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--bg-primary);
+            transition: background 0.3s;
         }
-        .search{flex:1;max-width:640px;display:flex;align-items:center;background:var(--card);padding:.5rem;border-radius:10px;box-shadow:0 2px 6px rgba(15,23,42,.04)}
-        .search input{border:0;outline:0;font-size:14px;padding:.5rem;background:transparent;width:100%}
-        .actions{display:flex;gap:.5rem;align-items:center}
-        button.icon{
-            background:var(--card);border:0;padding:.5rem;border-radius:10px;cursor:pointer;box-shadow:0 2px 6px rgba(15,23,42,.04)
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 180px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid #06b6d4;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 0;
+            box-shadow: 2px 0 10px rgba(8, 145, 178, 0.1);
         }
-        main{padding:1rem 1.25rem 3rem;max-width:1100px;margin:0 auto}
-        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
-        .card{background:var(--card);padding:1rem;border-radius:12px;box-shadow:0 6px 20px rgba(11,15,30,.04);display:flex;flex-direction:column;gap:.5rem}
-        .media{height:140px;border-radius:8px;background:linear-gradient(135deg,#f0f4ff,#fff);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--muted)}
-        .title{font-weight:600;font-size:15px}
-        .desc{font-size:13px;color:var(--muted);min-height:36px}
-        .price-row{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
-        .price{font-weight:700;color:var(--accent)}
-        .btn{background:var(--accent);color:#fff;border:0;padding:.5rem .7rem;border-radius:8px;cursor:pointer}
-        .chip{font-size:12px;background:#eef2ff;color:var(--accent);padding:.25rem .5rem;border-radius:999px}
-        /* cart drawer */
-        .drawer{position:fixed;right:20px;bottom:20px;width:380px;max-width:calc(100% - 40px);background:var(--card);border-radius:12px;box-shadow:0 20px 60px rgba(11,15,30,.18);overflow:hidden;transform:translateY(0);z-index:60}
-        .drawer.hidden{display:none}
-        .drawer header{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-bottom:1px solid #f2f4f7}
-        .drawer .items{max-height:360px;overflow:auto;padding:1rem}
-        .item{display:flex;gap:.75rem;align-items:center;padding:.5rem 0;border-bottom:1px dashed #f4f6fb}
-        .item:last-child{border-bottom:0}
-        .qty{display:flex;align-items:center;gap:.25rem}
-        .qty button{background:#f1f5f9;border:0;padding:.3rem .5rem;border-radius:6px;cursor:pointer}
-        .checkout{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-top:1px solid #f2f4f7}
-        .empty{padding:2rem;text-align:center;color:var(--muted)}
-        /* responsive */
-        @media (max-width:560px){
-            .drawer{right:10px;left:10px;width:auto}
-            .media{height:120px}
+
+        .logo {
+            padding: 0 20px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            text-align: center;
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: var(--text-sidebar);
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-sidebar-active);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: var(--text-sidebar-active);
+            font-weight: 600;
+            border-left: 3px solid #fff;
+        }
+
+        .nav-item sup {
+            font-size: 10px;
+            color: #cffafe;
+            opacity: 0.7;
+        }
+
+        .nav-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-footer a {
+            display: block;
+            padding: 8px 0;
+            color: var(--text-sidebar);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .nav-footer a:hover {
+            color: #fff;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .content-wrapper {
+            min-height: 100%;
+            background: var(--bg-secondary);
+            margin: 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 50vh;
+            background: var(--bg-hero);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .hero-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-logo img {
+            max-width: 300px;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 60px 80px;
+            background: var(--bg-secondary);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        .section-text {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .contents-list {
+            list-style: none;
+        }
+
+        .contents-list li {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .contents-list span {
+            margin-right: 10px;
+            color: #999;
+        }
+
+        /* Page Styles */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Table Styles */
+        .table-container {
+            padding: 40px;
+            overflow-x: auto;
+            background: var(--bg-secondary);
+        }
+
+        .table-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .data-table th {
+            background: var(--table-header);
+            font-weight: 600;
+            color: var(--table-header-text);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--log-bg);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #2563eb;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #6b7280;
+        }
+
+        .btn-cancel:hover {
+            background: #4b5563;
+        }
+
+        /* Log Styles */
+        .log-container {
+            padding: 40px;
+            background: var(--bg-secondary);
+        }
+
+        .log-entry {
+            padding: 15px;
+            border-left: 3px solid var(--log-border);
+            margin-bottom: 15px;
+            background: var(--log-bg);
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .log-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--btn-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .log-details {
+            flex: 1;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .log-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .log-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Settings Styles */
+        .settings-container {
+            padding: 40px;
+            max-width: 600px;
+            background: var(--bg-secondary);
+        }
+
+        .settings-group {
+            margin-bottom: 30px;
+        }
+
+        .settings-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--btn-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .btn {
+            padding: 10px 24px;
+            background: var(--btn-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--btn-hover);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .page-header {
+            padding: 40px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--table-header-text);
+        }
+
+        .page-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .error-message {
+            color: #ef4444;
+            padding: 20px;
+            background: #fee;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        [data-theme="dark"] .error-message {
+            background: #7f1d1d;
+            color: #fca5a5;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="brand">
-            <div class="logo">TS</div>
-            <div>
-                <div>Toko Sederhana</div>
-                <div style="font-size:12px;color:var(--muted)">Demo toko web - tanpa backend</div>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo">SMKN TAKERAN</div>
+        
+        <nav class="nav-menu">
+            <div class="nav-item active" data-page="home">Home<sup>01</sup></div>
+            <div class="nav-item" data-page="tentang">Tentang<sup>02</sup></div>
+            <div class="nav-item" data-page="log">Data Log<sup>03</sup></div>
+            <div class="nav-item" data-page="tabel">Data Pengguna<sup>04</sup></div>
+            <div class="nav-item" data-page="pengaturan">Pengaturan<sup>05</sup></div>
+        </nav>
+
+        <div class="nav-footer">
+            <a href="#" id="contactUs">Contact Us</a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <div class="hero">
+                <div class="hero-logo">
+                    <img src="file/1.jpg" alt="Logo SMKN Takeran">
+                </div>
+            </div>
+            <div class="content-section">
+                <div class="content-grid">
+                    <div>
+                        <h1 class="section-title">SMKN Takeran</h1>
+                    </div>
+                    <div>
+                        <p class="section-text">
+                            Selamat datang di Dashboard SMKN Takeran. Platform ini dirancang untuk memudahkan pengelolaan data siswa, monitoring kehadiran, dan administrasi sekolah secara digital.
+                        </p>
+                        <p class="section-text">
+                            Dengan sistem yang terintegrasi dengan Supabase, semua data dapat diakses secara real-time dan tersimpan dengan aman di cloud. Dashboard ini menyediakan visualisasi data yang jelas dan mudah dipahami.
+                        </p>
+                        <p class="section-text">
+                            Gunakan menu navigasi di sebelah kiri untuk mengakses berbagai fitur yang tersedia, mulai dari data log kehadiran hingga informasi profil pengguna lengkap.
+                        </p>
+                    </div>
+                </div>
+                <div style="margin-top: 60px;">
+                    <h2 style="font-size: 24px; margin-bottom: 30px; color: var(--text-primary);">Menu Tersedia</h2>
+                    <ul class="contents-list">
+                        <li><span>01</span>Home - Halaman Utama</li>
+                        <li><span>02</span>Tentang - Informasi Sekolah</li>
+                        <li><span>03</span>Data Log - Riwayat Kehadiran</li>
+                        <li><span>04</span>Data Pengguna - Profil Siswa</li>
+                        <li><span>05</span>Pengaturan - Konfigurasi Tema</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <div class="search" role="search">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-left:.4rem"><path d="M21 21l-4.35-4.35" stroke="#9aa4b2" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#9aa4b2" stroke-width="1.6"/></svg>
-            <input id="q" placeholder="Cari produk, mis. kaos, sepatu..." />
-            <button class="icon" id="clearSearch" title="Clear" style="display:none">✕</button>
-        </div>
-
-        <div class="actions">
-            <div class="chip" id="countBadge">0 items</div>
-            <button class="icon" id="toggleCart" aria-label="Open cart">
-                🛒
-            </button>
-        </div>
-    </header>
-
-    <main>
-        <section style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-            <h2 style="margin:0">Produk Unggulan</h2>
-            <div style="font-size:13px;color:var(--muted)">Pilih dan tambahkan ke keranjang</div>
-        </section>
-
-        <section>
-            <div class="grid" id="catalog"></div>
-        </section>
-    </main>
-
-    <!-- Cart Drawer -->
-    <aside class="drawer hidden" id="cartDrawer" aria-hidden="true">
-        <header>
-            <div style="font-weight:700">Keranjang</div>
-            <div style="font-size:13px;color:var(--muted)" id="summaryCount">0 items</div>
-        </header>
-        <div class="items" id="cartItems">
-            <div class="empty" id="emptyState">Keranjang kosong. Tambahkan produk untuk memulai.</div>
-        </div>
-        <div class="checkout">
-            <div>
-                <div style="font-size:13px;color:var(--muted)">Total</div>
-                <div style="font-weight:800;font-size:18px" id="totalPrice">Rp0</div>
+        <!-- Tentang Page -->
+        <div class="page" id="tentang">
+            <div class="page-header">
+                <h1 class="page-title">Tentang SMKN Takeran</h1>
+                <p class="page-description">Sistem Manajemen Sekolah Digital</p>
             </div>
-            <div>
-                <button class="btn" id="checkoutBtn" disabled>Checkout</button>
+            <div class="content-section">
+                <p class="section-text">
+                    SMKN Takeran adalah sekolah menengah kejuruan yang berkomitmen untuk memberikan pendidikan berkualitas dan menghasilkan lulusan yang siap kerja. Kami mengintegrasikan teknologi dalam proses pembelajaran dan administrasi untuk meningkatkan efisiensi.
+                </p>
+                <p class="section-text">
+                    Dashboard ini merupakan bagian dari upaya digitalisasi sistem manajemen sekolah, yang memungkinkan guru, siswa, dan staf administrasi untuk mengakses informasi dengan cepat dan akurat.
+                </p>
+                <h3 style="margin-top: 40px; margin-bottom: 20px; font-size: 24px; color: var(--text-primary);">Fitur Utama</h3>
+                <ul style="list-style-position: inside; line-height: 2; color: var(--text-primary);">
+                    <li>Real-time attendance tracking dan monitoring</li>
+                    <li>Database siswa yang terorganisir</li>
+                    <li>Sistem reporting yang komprehensif</li>
+                    <li>Interface yang user-friendly</li>
+                    <li>Cloud-based storage dengan Supabase</li>
+                    <li>Dark mode untuk kenyamanan mata</li>
+                </ul>
             </div>
         </div>
-    </aside>
+
+        <!-- Data Log Page -->
+        <div class="page" id="log">
+            <div class="page-header">
+                <h1 class="page-title">Data Log Kehadiran</h1>
+                <p class="page-description">Riwayat kehadiran siswa dari tabel attendance</p>
+            </div>
+            <div class="log-container">
+                <div id="logContent" class="loading">Memuat data log...</div>
+            </div>
+        </div>
+
+        <!-- Tabel Data Page -->
+        <div class="page" id="tabel">
+            <div class="page-header">
+                <h1 class="page-title">Data Pengguna</h1>
+                <p class="page-description">Informasi profil siswa dari tabel profiles</p>
+            </div>
+            <div class="table-container">
+                <div class="table-actions">
+                    <div class="bulk-actions">
+                        <button class="btn btn-small btn-danger" onclick="deleteSelected()" id="deleteBtn" disabled>
+                            🗑️ Hapus Terpilih
+                        </button>
+                    </div>
+                    <button class="btn btn-small btn-success" onclick="openAddModal()">
+                        ➕ Tambah Data
+                    </button>
+                </div>
+                <div id="tableContent" class="loading">Memuat data tabel...</div>
+            </div>
+        </div>
+
+        <!-- Pengaturan Page -->
+        <div class="page" id="pengaturan">
+            <div class="page-header">
+                <h1 class="page-title">Pengaturan</h1>
+                <p class="page-description">Konfigurasi tampilan aplikasi</p>
+            </div>
+            <div class="settings-container">
+                <div class="settings-group">
+                    <label class="settings-label">Tema Tampilan</label>
+                    <div class="theme-switch">
+                        <span style="color: var(--text-primary);">☀️ Terang</span>
+                        <label class="switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span style="color: var(--text-primary);">🌙 Gelap</span>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 13px; color: var(--text-secondary);">
+                        Pilih tema yang nyaman untuk mata Anda. Tema gelap dapat mengurangi kelelahan mata saat digunakan dalam waktu lama.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Add/Edit Data -->
+    <div class="modal" id="dataModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Tambah Data Pengguna</h2>
+            </div>
+            <form id="dataForm">
+                <input type="hidden" id="editId">
+                <div id="formFields"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-success">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
-        // Demo product data
-        const PRODUCTS = [
-            { id: 'p1', name: 'Kaos Polos Premium', price: 99000, desc: 'Kaos katun berkualitas, nyaman dipakai sehari-hari.', color:'#ffe8e6', emoji:'👕' },
-            { id: 'p2', name: 'Sneakers Sport', price: 349000, desc: 'Ringan dan support untuk aktivitas olahraga.', color:'#e8f3ff', emoji:'👟' },
-            { id: 'p3', name: 'Tas Ransel', price: 179000, desc: 'Kapasitas besar dan tahan air.', color:'#fff4e6', emoji:'🎒' },
-            { id: 'p4', name: 'Topi Trucker', price: 59000, desc: 'Gaya kasual, cocok untuk hangout.', color:'#e8fff2', emoji:'🧢' },
-            { id: 'p5', name: 'Jam Tangan Digital', price: 129000, desc: 'Tampilan modern dengan stopwatch.', color:'#f4ecff', emoji:'⌚' },
-            { id: 'p6', name: 'Mug Keramik', price: 45000, desc: 'Mug desain minimalis untuk minuman favorit.', color:'#fff5f0', emoji:'☕' }
-        ];
+        // Configuration
+        const config = {
+            supabaseUrl: 'https://ixetxxeztvdxtukxnifu.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4ZXR4eGV6dHZkeHR1a3huaWZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3NjU0NjgsImV4cCI6MjA3NDM0MTQ2OH0.59vGbOxRHZ6xZRnosTf-Whbs2JWQBp7joarh95EGOJg',
+            logTable: 'attendance',
+            dataTable: 'profiles'
+        };
 
-        // Simple cart stored in memory and localStorage
-        const CART_KEY = 'toko_demo_cart_v1';
-        const cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}'); // { id: qty }
-
-        const qInput = document.getElementById('q');
-        const catalogEl = document.getElementById('catalog');
-        const countBadge = document.getElementById('countBadge');
-        const toggleCart = document.getElementById('toggleCart');
-        const cartDrawer = document.getElementById('cartDrawer');
-        const cartItemsEl = document.getElementById('cartItems');
-        const summaryCount = document.getElementById('summaryCount');
-        const totalPriceEl = document.getElementById('totalPrice');
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        const clearSearch = document.getElementById('clearSearch');
-        const emptyState = document.getElementById('emptyState');
-
-        function formatIDR(n){
-            return 'Rp' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
         }
 
-        function saveCart(){
-            localStorage.setItem(CART_KEY, JSON.stringify(cart));
-            renderCart();
-            renderBadge();
-        }
+        document.getElementById('themeToggle').addEventListener('change', function() {
+            const theme = this.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        });
 
-        function addToCart(id, qty = 1){
-            cart[id] = (cart[id] || 0) + qty;
-            saveCart();
-            flashBadge();
-        }
-
-        function setQty(id, qty){
-            if (qty <= 0) { delete cart[id]; } else { cart[id] = qty; }
-            saveCart();
-        }
-
-        function removeItem(id){
-            delete cart[id];
-            saveCart();
-        }
-
-        function getCartItems(){
-            return Object.keys(cart).map(id => {
-                const product = PRODUCTS.find(p => p.id === id);
-                return { product, qty: cart[id] };
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                const pageId = this.getAttribute('data-page');
+                document.getElementById(pageId).classList.add('active');
+                
+                if (pageId === 'log') {
+                    loadLogs();
+                } else if (pageId === 'tabel') {
+                    loadTable();
+                }
             });
+        });
+
+        // Fetch data from Supabase
+        async function fetchFromSupabase(table) {
+            try {
+                const response = await fetch(`${config.supabaseUrl}/rest/v1/${table}?select=*&order=created_at.desc`, {
+                    headers: {
+                        'apikey': config.supabaseKey,
+                        'Authorization': `Bearer ${config.supabaseKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return { error: error.message };
+            }
         }
 
-        function renderProducts(filter = ''){
-            catalogEl.innerHTML = '';
-            const q = filter.trim().toLowerCase();
-            const list = PRODUCTS.filter(p => {
-                if (!q) return true;
-                return p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
-            });
-            if (!list.length){
-                catalogEl.innerHTML = '<div style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted)">Tidak ada produk cocok.</div>';
+        // Load logs
+        async function loadLogs() {
+            const container = document.getElementById('logContent');
+            container.innerHTML = '<div class="loading">Memuat data log...</div>';
+
+            const data = await fetchFromSupabase(config.logTable);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error-message">Error: ${data.error}</div>`;
                 return;
             }
-            for (const p of list){
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.innerHTML = `
-                    <div class="media" style="background:${p.color}">${p.emoji}</div>
-                    <div class="title">${p.name}</div>
-                    <div class="desc">${p.desc}</div>
-                    <div class="price-row">
-                        <div>
-                            <div class="price">${formatIDR(p.price)}</div>
-                            <div style="font-size:12px;color:var(--muted)">${Math.round(Math.random()*100)}+ terjual</div>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
-                            <button class="btn add" data-id="${p.id}">Tambah</button>
-                            <button class="icon" data-id="${p.id}" title="Tambah 1">&plus;</button>
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; color: #999;">Tidak ada data log kehadiran.</div>';
+                return;
+            }
+
+            container.innerHTML = data.map(log => {
+                const date = log.created_at ? new Date(log.created_at).toLocaleString('id-ID') : 'N/A';
+                const name = log.user_name || log.full_name || log.name || 'Unknown User';
+                const status = log.status || log.action || 'Check-in';
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                
+                return `
+                    <div class="log-entry">
+                        <div class="log-avatar">${initials}</div>
+                        <div class="log-details">
+                            <div class="log-header">
+                                <span class="log-name">${name}</span>
+                                <span class="log-time">${date}</span>
+                            </div>
+                            <div class="log-message">Status: ${status}</div>
                         </div>
                     </div>
                 `;
-                catalogEl.appendChild(div);
-            }
-
-            // attach handlers
-            catalogEl.querySelectorAll('.add').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    addToCart(btn.dataset.id, 1);
-                });
-            });
-            catalogEl.querySelectorAll('.icon[data-id]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    addToCart(btn.dataset.id, 1);
-                });
-            });
+            }).join('');
         }
 
-        function renderBadge(){
-            const totalItems = Object.values(cart).reduce((s,n)=>s+n,0);
-            countBadge.textContent = `${totalItems} item${totalItems!==1?'s':''}`;
-        }
+        // Load table data
+        let selectedRows = new Set();
+        let currentData = [];
 
-        function renderCart(){
-            const items = getCartItems();
-            cartItemsEl.innerHTML = '';
-            if (!items.length){
-                emptyState.style.display = 'block';
-                cartItemsEl.appendChild(emptyState);
-                summaryCount.textContent = '0 items';
-                totalPriceEl.textContent = formatIDR(0);
-                checkoutBtn.disabled = true;
+        async function loadTable() {
+            const container = document.getElementById('tableContent');
+            container.innerHTML = '<div class="loading">Memuat data tabel...</div>';
+
+            const data = await fetchFromSupabase(config.dataTable);
+
+            if (data.error) {
+                container.innerHTML = `<div class="error-message">Error: ${data.error}</div>`;
                 return;
             }
-            emptyState.style.display = 'none';
-            let total = 0;
-            for (const it of items){
-                const p = it.product;
-                const qty = it.qty;
-                total += p.price * qty;
-                const el = document.createElement('div');
-                el.className = 'item';
-                el.innerHTML = `
-                    <div style="width:56px;height:56px;border-radius:8px;background:${p.color};display:grid;place-items:center;font-size:22px">${p.emoji}</div>
-                    <div style="flex:1">
-                        <div style="font-weight:700">${p.name}</div>
-                        <div style="font-size:13px;color:var(--muted)">${formatIDR(p.price)}</div>
-                    </div>
-                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
-                        <div class="qty">
-                            <button class="dec" data-id="${p.id}">−</button>
-                            <div style="padding:.2rem .4rem;border-radius:6px;background:#f8fafc">${qty}</div>
-                            <button class="inc" data-id="${p.id}">+</button>
-                        </div>
-                        <button class="icon remove" data-id="${p.id}" title="Remove">🗑</button>
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; color: #999;">Tidak ada data pengguna.</div>';
+                return;
+            }
+
+            currentData = data;
+            selectedRows.clear();
+            document.getElementById('deleteBtn').disabled = true;
+
+            const keys = [...new Set(data.flatMap(item => Object.keys(item)))];
+
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                            </th>
+                            ${keys.map(key => `<th>${key}</th>`).join('')}
+                            <th style="width: 150px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map((row, index) => `
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="row-checkbox" data-id="${row.id}" onchange="toggleRowSelection(this)">
+                                </td>
+                                ${keys.map(key => {
+                                    let value = row[key];
+                                    if (value === null || value === undefined) value = '-';
+                                    if (typeof value === 'object') value = JSON.stringify(value);
+                                    return `<td>${value}</td>`;
+                                }).join('')}
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon btn-edit" onclick='editRow(${JSON.stringify(row)})'>✏️ Edit</button>
+                                        <button class="btn-icon btn-delete" onclick="deleteRow('${row.id}')">🗑️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                if (checkbox.checked) {
+                    selectedRows.add(cb.dataset.id);
+                } else {
+                    selectedRows.delete(cb.dataset.id);
+                }
+            });
+            updateDeleteButton();
+        }
+
+        function toggleRowSelection(checkbox) {
+            if (checkbox.checked) {
+                selectedRows.add(checkbox.dataset.id);
+            } else {
+                selectedRows.delete(checkbox.dataset.id);
+                document.getElementById('selectAll').checked = false;
+            }
+            updateDeleteButton();
+        }
+
+        function updateDeleteButton() {
+            document.getElementById('deleteBtn').disabled = selectedRows.size === 0;
+        }
+
+        // Modal functions
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Data Pengguna';
+            document.getElementById('editId').value = '';
+            
+            // Generate form fields based on current data structure
+            const sampleData = currentData[0] || {};
+            const fields = Object.keys(sampleData).filter(key => 
+                key !== 'id' && 
+                key !== 'created_at' && 
+                key !== 'updated_at'
+            );
+            
+            const formFields = document.getElementById('formFields');
+            formFields.innerHTML = fields.map(field => {
+                const fieldType = field.toLowerCase().includes('email') ? 'email' : 'text';
+                return `
+                    <div class="form-group">
+                        <label class="form-label">${field}</label>
+                        <input type="${fieldType}" class="form-input" name="${field}" required>
                     </div>
                 `;
-                cartItemsEl.appendChild(el);
+            }).join('');
+            
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function editRow(row) {
+            document.getElementById('modalTitle').textContent = 'Edit Data Pengguna';
+            document.getElementById('editId').value = row.id;
+            
+            const fields = Object.keys(row).filter(key => 
+                key !== 'id' && 
+                key !== 'created_at' && 
+                key !== 'updated_at'
+            );
+            
+            const formFields = document.getElementById('formFields');
+            formFields.innerHTML = fields.map(field => {
+                const fieldType = field.toLowerCase().includes('email') ? 'email' : 'text';
+                return `
+                    <div class="form-group">
+                        <label class="form-label">${field}</label>
+                        <input type="${fieldType}" class="form-input" name="${field}" value="${row[field] || ''}" required>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('dataModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').classList.remove('active');
+            document.getElementById('dataForm').reset();
+        }
+
+        // CRUD Operations
+        async function deleteRow(id) {
+            if (!confirm('Yakin ingin menghapus data ini?')) return;
+            
+            try {
+                const response = await fetch(`${config.supabaseUrl}/rest/v1/${config.dataTable}?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': config.supabaseKey,
+                        'Authorization': `Bearer ${config.supabaseKey}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Data berhasil dihapus!');
+                    loadTable();
+                } else {
+                    throw new Error('Gagal menghapus data');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
             }
-            summaryCount.textContent = `${items.reduce((s,i)=>s+i.qty,0)} items`;
-            totalPriceEl.textContent = formatIDR(total);
-            checkoutBtn.disabled = false;
-
-            cartItemsEl.querySelectorAll('.inc').forEach(b => {
-                b.addEventListener('click', () => {
-                    addToCart(b.dataset.id, 1);
-                });
-            });
-            cartItemsEl.querySelectorAll('.dec').forEach(b => {
-                b.addEventListener('click', () => {
-                    const id = b.dataset.id;
-                    setQty(id, (cart[id]||1) - 1);
-                });
-            });
-            cartItemsEl.querySelectorAll('.remove').forEach(b => {
-                b.addEventListener('click', () => {
-                    removeItem(b.dataset.id);
-                });
-            });
         }
 
-        function flashBadge(){
-            countBadge.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],{duration:220});
+        async function deleteSelected() {
+            if (selectedRows.size === 0) return;
+            if (!confirm(`Yakin ingin menghapus ${selectedRows.size} data terpilih?`)) return;
+            
+            try {
+                for (const id of selectedRows) {
+                    await fetch(`${config.supabaseUrl}/rest/v1/${config.dataTable}?id=eq.${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': config.supabaseKey,
+                            'Authorization': `Bearer ${config.supabaseKey}`
+                        }
+                    });
+                }
+                alert('Data berhasil dihapus!');
+                loadTable();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
         }
 
-        // UI interactions
-        toggleCart.addEventListener('click', () => {
-            const open = cartDrawer.classList.toggle('hidden');
-            cartDrawer.setAttribute('aria-hidden', open ? 'true' : 'false');
-            renderCart();
+        // Form submit
+        document.getElementById('dataForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            const editId = document.getElementById('editId').value;
+            
+            try {
+                let response;
+                if (editId) {
+                    // Update - don't send created_at
+                    const updateData = {...data};
+                    delete updateData.created_at;
+                    
+                    response = await fetch(`${config.supabaseUrl}/rest/v1/${config.dataTable}?id=eq.${editId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': config.supabaseKey,
+                            'Authorization': `Bearer ${config.supabaseKey}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+                } else {
+                    // Insert - let database handle id and created_at automatically
+                    const insertData = {...data};
+                    delete insertData.id;
+                    delete insertData.created_at;
+                    
+                    response = await fetch(`${config.supabaseUrl}/rest/v1/${config.dataTable}`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': config.supabaseKey,
+                            'Authorization': `Bearer ${config.supabaseKey}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify(insertData)
+                    });
+                }
+
+                if (response.ok) {
+                    alert(editId ? 'Data berhasil diupdate!' : 'Data berhasil ditambahkan!');
+                    closeModal();
+                    loadTable();
+                } else {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(errorText);
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                alert('Error: ' + error.message);
+            }
         });
 
-        qInput.addEventListener('input', (e) => {
-            const v = qInput.value || '';
-            renderProducts(v);
-            clearSearch.style.display = v ? 'inline-block' : 'none';
-        });
-        clearSearch.addEventListener('click', () => {
-            qInput.value = '';
-            clearSearch.style.display = 'none';
-            renderProducts('');
-        });
+        // Initialize
+        initTheme();
 
-        checkoutBtn.addEventListener('click', () => {
-            const items = getCartItems();
-            if (!items.length) return;
-            // Small checkout flow - prompt for name & address
-            const name = prompt('Nama pembeli (untuk demo):', '');
-            if (!name) return alert('Checkout dibatalkan.');
-            const address = prompt('Alamat pengiriman:', '');
-            if (!address) return alert('Checkout dibatalkan.');
-            // Simulate order created
-            const orderTotal = Object.entries(cart).reduce((s,[id,qty])=>{
-                const p = PRODUCTS.find(x=>x.id===id);
-                return s + (p.price * qty);
-            },0);
-            alert(`Terima kasih, ${name}! Pesanan Anda (${Object.values(cart).reduce((a,b)=>a+b,0)} item) berhasil.\nTotal: ${formatIDR(orderTotal)}\nAlamat: ${address}\n\n(Ini hanya demo, tidak ada pembayaran diproses.)`);
-            // clear cart
-            for (const k of Object.keys(cart)) delete cart[k];
-            saveCart();
-            cartDrawer.classList.add('hidden');
-        });
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
 
-        // init render
-        renderProducts();
-        renderCart();
-        renderBadge();
+        // Contact button
+        document.getElementById('contactUs').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Hubungi kami di: regan.dewa39@smk.belajar.id');
+        });
     </script>
 </body>
-</html></div>
+</html>
